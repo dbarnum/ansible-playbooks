@@ -1,0 +1,5 @@
+pis:
+  hosts:
+    pete:
+      ansible_host: petethorton.lan
+      
