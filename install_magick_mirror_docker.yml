@@ -1,0 +1,22 @@
+
+- name: Create docker directory if it does not exist
+  ansible.builtin.file:
+    path: /usr/local/bin/magic-mirror/docker
+    state: directory
+    mode: '0755'
+
+- name: Git checkout Magick Mirror 
+  ansible.builtin.git:
+    repo: 'https://gitlab.com/khassel/magicmirror.git'
+    dest: /usr/local/bin/magic-mirror/docker
+    version: release-0.22
+
+- name: Copy electron file 
+  ansible.builtin.copy:
+    src: /usr/local/bin/magic-mirror/docker/magicmirror/run/rpi.yml
+    dest: /usr/local/bin/magic-mirror/docker/magicmirror/run/docker-compose.yml
+
+- name: Change to the run directory and start the mirror 
+  ansible.builtin.command: /usr/bin/docker compose up -d 
+  args:
+    chdir:  /usr/local/bin/magic-mirror/docker/magicmirror/run/
