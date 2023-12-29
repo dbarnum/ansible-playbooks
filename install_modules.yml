@@ -1,0 +1,36 @@
+- name: Install MMM Modules and Config File
+  hosts: pis
+  vars:
+    install_dir: /usr/local/bin/magicmirror/
+    mounts_dir: "{{install_dir}}/mounts/"
+    config_dir: "{{mounts_dir}}/config"
+    modules:
+      - { name: MMM-Wallpaper, url: https://github.com/kolbyjack/MMM-Wallpaper.git }
+      - { name: MMM-Smartthings,url:  https://github.com/buzzkc/MMM-Smartthings.git }
+      - { name: MMM-NFL, url: https://github.com/fewieden/MMM-NFL.git }
+
+  tasks:
+  - name: Copy Magick Mirror Config file
+    ansible.builtin.git:            
+      repo: git@github.com:dbarnum/mm-config.git
+      dest: ~/mm-config/
+  - name: Remove default config file (delete file)
+    ansible.builtin.file:
+      path: /usr/local/bin/magicmirror/mounts/config/config.js
+      state: absent
+  - name: Link to config file in home directory     
+    ansible.builtin.file:
+      src: ~/mm-config/config.js
+      dest: /usr/local/bin/magicmirror/mounts/config/config.js
+      state: link
+  - name: Install the modules
+    ansible.builtin.git:            
+      repo: "{{item.url}}"
+      dest: "{{install_dir}}mounts/modules/{{item.name}}"
+    loop: "{{modules}}"    
+  
+  - name: NPM Install
+    community.general.npm:
+      executable: /home/dbarnum/.nvm/versions/node/v21.5.0/bin/npm
+      path: "{{install_dir}}mounts/modules/{{item.name}}"
+    loop: "{{modules}}"
